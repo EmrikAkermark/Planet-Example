@@ -46,7 +46,7 @@ public class PlanetExplosion : MonoBehaviour
 
     void SetPositions()
     {
-        for (int i = 0; i < rotationDivisionNumber+1; i++)
+        for (int i = 0; i < rotationDivisionNumber; i++)
         {
             //We don't bother filling in the "poles" of the planet, as that would just add a bunch of cubes in the same position
             for (int j = 0; j < rotationDivisionNumber / 2 - 1; j++)
