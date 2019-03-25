@@ -69,6 +69,7 @@ public class PlanetExplosion : MonoBehaviour
          * put origin at Explosion origin
          * loop through cubes list
          * Figure out new position based on explosion strength, distance from origin, what way to go, and weight
+         * Make the cubes face the explosion origin        
          */
         for (int i = 0; i < cubes.Count; i++)
         {
