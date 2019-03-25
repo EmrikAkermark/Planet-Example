@@ -22,11 +22,11 @@ public class PlanetExplosion : MonoBehaviour
     private float circumference;
     List<CubeClass> cubes = new List<CubeClass>();
 
-    // Start is called before the first frame update
     void Start()
     {
         GenerateExplosion();
     }
+
 
     void CalculateRotationSegment(int divNumber = 1)
     {
@@ -39,15 +39,16 @@ public class PlanetExplosion : MonoBehaviour
             rotationDivisionNumber = divNumber / 2;
             float rotationDivisionNumberFloat = rotationDivisionNumber;
             rotationSegment = 360 / rotationDivisionNumberFloat;
-            Debug.Log(rotationSegment +" " + rotationDivisionNumber+" " + 360 / rotationDivisionNumberFloat);
             SetPositions();
         }
     }
+
 
     void SetPositions()
     {
         for (int i = 0; i < rotationDivisionNumber+1; i++)
         {
+            //We don't bother filling in the "poles" of the planet, as that would just add a bunch of cubes in the same position
             for (int j = 0; j < rotationDivisionNumber / 2 - 1; j++)
             {
                 CubeClass cube = new CubeClass();
