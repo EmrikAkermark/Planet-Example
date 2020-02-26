@@ -125,10 +125,10 @@ GameObject:
   m_Layer: 0
   m_Name: Planet (1)
   m_TagString: Untagged
-  m_Icon: {fileID: 7174288486110832750, guid: 0000000000000000d000000000000000, type: 0}
+  m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &401207569
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -142,7 +142,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PlanetRadius: 8
-  ObjectWidth: 1
+  ObjectWidth: 2
   unitPrefab: {fileID: 6558835758767001869, guid: 0ae21eccabd9b4a159d8e1f34e8eb452,
     type: 3}
   CubeWeight: 2
@@ -150,6 +150,7 @@ MonoBehaviour:
   ExplosiveForce: 50
   ExplosiveRadius: 50
   ExplosionOrigin: {fileID: 1862526920}
+  VisualiserSpeed: 3
 --- !u!4 &401207570
 Transform:
   m_ObjectHideFlags: 0
@@ -247,7 +248,7 @@ GameObject:
   m_Layer: 0
   m_Name: Planet
   m_TagString: Untagged
-  m_Icon: {fileID: 7174288486110832750, guid: 0000000000000000d000000000000000, type: 0}
+  m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -263,8 +264,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9435fae65fe9b4199bd087e6d4a1d291, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlanetRadius: 30
-  ObjectWidth: 1
+  PlanetRadius: 20
+  ObjectWidth: 10
   unitPrefab: {fileID: 6558835758767001869, guid: 0ae21eccabd9b4a159d8e1f34e8eb452,
     type: 3}
   CubeWeight: 3
@@ -272,6 +273,7 @@ MonoBehaviour:
   ExplosiveForce: 0
   ExplosiveRadius: 0
   ExplosionOrigin: {fileID: 1862526920}
+  VisualiserSpeed: 3
 --- !u!4 &773210300
 Transform:
   m_ObjectHideFlags: 0
