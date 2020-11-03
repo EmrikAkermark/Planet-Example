@@ -5,7 +5,7 @@ public class FixedUpdateTrigger : MonoBehaviour
 {
     public UnityEvent Event;
 
-    void Update()
+    void FixedUpdate()
     {
         Event.Invoke();
     }

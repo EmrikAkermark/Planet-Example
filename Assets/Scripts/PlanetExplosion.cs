@@ -14,52 +14,34 @@ public class PlanetExplosion : MonoBehaviour
     public float ExplosiveForce;
     public float ExplosiveRadius;
 
+    public float[] ExplosiveArray;
+
     public Transform ExplosionOrigin;
 
-
-    private int rotationDivisionNumber;
-    private float rotationSegment;
-    private float circumference;
-    List<CubeClass> cubes = new List<CubeClass>();
+    public int VisualiserSpeed = 1;
+    private List<CubeClass> cubes = new List<CubeClass>();
+    private Vector3 lastPosition = Vector3.zero;
+    private bool physicsEngaged = false;
 
     void Start()
     {
-        GenerateExplosion();
+        
     }
 
-
-    void CalculateRotationSegment(int divNumber = 1)
+    public void GenerateExplosion()
     {
-        if (circumference / divNumber > ObjectWidth)
-        {
-            CalculateRotationSegment(divNumber * 2);
-        }
-        else
-        {
-            rotationDivisionNumber = divNumber / 2;
-            float rotationDivisionNumberFloat = rotationDivisionNumber;
-            rotationSegment = 360 / rotationDivisionNumberFloat;
-            SetPositions();
-        }
+        Clear();
+        SetUpAngles();
+        Explode();
+        StartCoroutine(Visualiser());
     }
 
-
-    void SetPositions()
+    public void GenerateOptimisedExplosion()
     {
-        for (int i = 0; i < rotationDivisionNumber; i++)
-        {
-            //We don't bother filling in the "poles" of the planet, as that would just add a bunch of cubes in the same position
-            for (int j = 0; j < rotationDivisionNumber / 2 - 1; j++)
-            {
-                CubeClass cube = new CubeClass();
-                float weight = CubeWeight + Random.Range(-CubeWeightVariation, CubeWeightVariation);
-                Vector3 pos = Quaternion.Euler(rotationSegment * (j - (rotationDivisionNumber / 4 - 1)), rotationSegment * i, rotationSegment * (j - (rotationDivisionNumber / 4 - 1))) * Vector3.forward * PlanetRadius + gameObject.transform.position;               
-                cube.Cube = Instantiate(unitPrefab, pos, transform.rotation, gameObject.transform);
-                cube.StartVector = pos;
-                cube.Weight = weight;
-                cubes.Add(cube);
-            }
-        }
+        Clear();
+        SetUpAngles();
+        OptimisedExplosionSetup();
+        StartCoroutine(Visualiser());
     }
 
     public void Explode()
@@ -71,18 +53,64 @@ public class PlanetExplosion : MonoBehaviour
          * Figure out new position based on explosion strength, distance from origin, what way to go, and weight
          * Make the cubes face the explosion origin        
          */
+        //if (ExplosionOrigin.position == lastPosition || physicsEngaged)
+        //    return;
         for (int i = 0; i < cubes.Count; i++)
         {
             cubes[i].Cube.transform.position = cubes[i].StartVector + Vector3.Normalize(cubes[i].StartVector - ExplosionOrigin.position) * ExplosionEnergy(cubes[i].StartVector, cubes[i].Weight);
             cubes[i].Cube.transform.rotation = Quaternion.LookRotation(Vector3.Normalize(cubes[i].StartVector - ExplosionOrigin.position));
         }
+        lastPosition = ExplosionOrigin.position;
+    }
+    public void OptimisedExplode()
+    {
+        /*
+         * Generate an explosion
+         * put origin at Explosion origin
+         * loop through cubes list
+         * Figure out new position based on explosion strength, distance from origin, what way to go, and weight
+         * Make the cubes face the explosion origin        
+         */
+        //if (ExplosionOrigin.position == lastPosition || physicsEngaged)
+        //    return;
+        for (int i = 0; i < cubes.Count; i++)
+        {
+            cubes[i].Cube.transform.position = cubes[i].StartVector + Vector3.Normalize(cubes[i].StartVector - ExplosionOrigin.position) * OptimisedExplosion(cubes[i].StartVector, cubes[i].Weight);
+            cubes[i].Cube.transform.rotation = Quaternion.LookRotation(Vector3.Normalize(cubes[i].StartVector - ExplosionOrigin.position));
+        }
+        lastPosition = ExplosionOrigin.position;
+    }
+
+    void OptimisedExplosionSetup()
+    {
+        float maxDistance = Mathf.Sqrt(ExplosiveForce * ExplosiveRadius);
+        ExplosiveArray = new float[Mathf.CeilToInt(maxDistance)];
+        for (int i = 0; i < ExplosiveArray.Length; i++)
+        {
+            ExplosiveArray[i] = -(Mathf.Pow(i, 2)) / ExplosiveForce + ExplosiveRadius;
+        }
+    }
+
+    float OptimisedExplosion(Vector3 cubeStart, float cubeWeight)
+    {
+        float dist = Vector3.Distance(cubeStart, ExplosionOrigin.position);
+        int distInt = Mathf.RoundToInt(dist);
+        if (distInt >= ExplosiveArray.Length)
+        {
+            return 0f;
+        }
+        else
+        {
+            return ExplosiveArray[distInt] / cubeWeight;
+        }
+
     }
 
     float ExplosionEnergy(Vector3 cubeStart, float cubeWeight)
     {
         float dist = Vector3.Distance(cubeStart, ExplosionOrigin.position);
-        float energy = (-dist * dist) / ExplosiveForce + ExplosiveRadius;
-        if (energy < 0)
+        float energy = -(Mathf.Pow(dist, 2)) / ExplosiveForce + ExplosiveRadius;
+        if (energy < 0f)
         {
             return 0f;
         }
@@ -92,9 +120,78 @@ public class PlanetExplosion : MonoBehaviour
         }
     }
 
+    private void SetUpAngles()
+    {
+        float circumference = PlanetRadius * Mathf.PI * 2;
+        float segments = 1;
+        while (circumference / segments > ObjectWidth)
+        {
+            segments++;
+        }
+        segments--;
+        float segmentAngle = 360 / segments;
+        int currentSegment = 0;
+        while (segmentAngle * currentSegment < 360f)
+        {
+            float currentAngle = segmentAngle * currentSegment;
+            float height = Mathf.Cos(Mathf.Deg2Rad * currentAngle) * PlanetRadius;
+            float radius = Mathf.Sin(Mathf.Deg2Rad * currentAngle) * PlanetRadius;
+            SetPositions(radius, height);
+            currentSegment++;
+        }
+        
+
+    }
+
+    private void SetPositions(float radius, float newHeight)
+    {
+        Vector3 heightMod = new Vector3(0, newHeight, 0);
+
+        float circumference = radius * Mathf.PI * 2;
+        float segments = 1;
+        while (circumference / segments > ObjectWidth)
+        {
+            segments++;
+        }
+        segments--;
+        float segmentAngle = 360 / segments;
+
+        for (int i = 0; i < segments; i++)
+        {
+            CubeClass cube = new CubeClass();
+            float weight = CubeWeight + Random.Range(-CubeWeightVariation, CubeWeightVariation);
+            Vector3 pos = Quaternion.Euler(0, segmentAngle * i, 0) * Vector3.forward * radius + gameObject.transform.position + heightMod;
+            cube.Cube = Instantiate(unitPrefab, pos, transform.rotation, gameObject.transform);
+            cube.StartVector = pos;
+            cube.Weight = weight;
+            cubes.Add(cube);
+        }
+    }
+
+    private IEnumerator Visualiser()
+    {
+        int numberOfCubes = cubes.Count;
+        for (int i = 0; i < numberOfCubes; i++)
+        {
+            cubes[i].Cube.SetActive(false);
+        }
+        int activatedCubes = 0;
+        int NextBatchOfCubes = VisualiserSpeed;
+        while(activatedCubes < numberOfCubes)
+        {
+            for (int i = activatedCubes; i < NextBatchOfCubes; i++)
+            {
+                cubes[i].Cube.SetActive(true);
+            }
+            yield return null;
+            activatedCubes = NextBatchOfCubes;
+            NextBatchOfCubes = Mathf.Min(NextBatchOfCubes + VisualiserSpeed, numberOfCubes);
+        }
+    }
 
     public void EngagePhysics()
     {
+        physicsEngaged = true;
         for (int i = 0; i < cubes.Count; i++)
         {
             cubes[i].Cube.transform.position = cubes[i].StartVector;
@@ -104,7 +201,6 @@ public class PlanetExplosion : MonoBehaviour
         }
     }
 
-
     void Clear()
     {
         foreach (CubeClass cube in cubes)
@@ -112,13 +208,6 @@ public class PlanetExplosion : MonoBehaviour
             Destroy(cube.Cube);
         }
         cubes.Clear();
-    }
-
-    public void GenerateExplosion()
-    {
-        Clear();
-        circumference = PlanetRadius * 2 * Mathf.PI;
-        CalculateRotationSegment();
-        Explode();
+        physicsEngaged = false;
     }
 }

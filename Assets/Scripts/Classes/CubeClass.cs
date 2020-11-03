@@ -9,6 +9,8 @@ public class CubeClass
 
     private Rigidbody cubeRB;
 
+   
+
     public void FlingCube(Vector3 direction)
     {
         cubeRB = Cube.GetComponent<Rigidbody>();
