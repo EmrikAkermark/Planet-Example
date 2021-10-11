@@ -141,8 +141,7 @@ public class PlanetExplosion : MonoBehaviour
             SetPositions(radius, height);
             currentSegment++;
         }
-        
-
+		Debug.Log($"There are currently {cubes.Count} number of boxes");
     }
 
     private void SetPositions(float radius, float newHeight)
