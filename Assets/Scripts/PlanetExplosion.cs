@@ -25,7 +25,7 @@ public class PlanetExplosion : MonoBehaviour
 
     void Start()
     {
-        
+        GenerateOptimisedExplosion();
     }
 
     public void GenerateExplosion()
@@ -108,11 +108,13 @@ public class PlanetExplosion : MonoBehaviour
 
     float ExplosionEnergy(Vector3 cubeStart, float cubeWeight)
     {
+        if (ExplosiveForce == 0)
+            return 0f;
         float dist = Vector3.Distance(cubeStart, ExplosionOrigin.position);
         float energy = -(Mathf.Pow(dist, 2)) / ExplosiveForce + ExplosiveRadius;
         if (energy < 0f)
         {
-            return 0f;
+            return energy / cubeWeight;
         }
         else
         {
