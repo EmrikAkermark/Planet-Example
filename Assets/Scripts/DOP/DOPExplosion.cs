@@ -75,6 +75,9 @@ public class DOPExplosion : MonoBehaviour
 			Vector3 myPosition = pos;
 			_entityManager.SetComponentData(instance, new Translation() { Value = myPosition });
 			_entityManager.SetComponentData(instance, new Rotation() { Value = quaternion.LookRotation(Vector3.zero - myPosition, new float3(0, 1, 0)) });
+			// I just want my entity to remember its start location
+			//_entityManager.AddComponentData(instance, new float3() { x = myPosition.x, y = myPosition.y, z = myPosition.z });
+			//_entityManager.SetComponentData(instance, new float3() { x = myPosition.x, y = myPosition.y, z = myPosition.z });
 			_numberOfBoxes++;
 		}
 	}
