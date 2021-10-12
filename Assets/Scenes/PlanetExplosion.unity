@@ -307,10 +307,10 @@ MonoBehaviour:
   CubeWeight: 5
   CubeWeightVariation: 2
   ExplosiveForce: 100
-  ExplosiveRadius: 10
+  ExplosiveRadius: 100
   ExplosiveArray: []
-  ExplosionOrigin: {fileID: 1142184322}
-  VisualiserSpeed: 10
+  ExplosionOrigin: {fileID: 1862526920}
+  VisualiserSpeed: 1000
 --- !u!4 &773210300
 Transform:
   m_ObjectHideFlags: 0
@@ -655,8 +655,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1711821187}
-  m_LocalRotation: {x: -0.05114062, y: -0.88518894, z: 0.100288585, w: -0.45140594}
-  m_LocalPosition: {x: -83.555115, y: 29.799095, z: 178.47258}
+  m_LocalRotation: {x: -0.11515501, y: -0.7045372, z: 0.11755105, w: -0.6903249}
+  m_LocalPosition: {x: -92.59995, y: 37.70834, z: 87.52613}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -672,6 +672,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1862526920}
   - component: {fileID: 1862526921}
+  - component: {fileID: 1862526922}
   m_Layer: 0
   m_Name: Explosion
   m_TagString: Untagged
@@ -687,7 +688,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1862526919}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 88}
+  m_LocalPosition: {x: 0, y: 0, z: -101.58}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -710,7 +711,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 773210299}
         m_TargetAssemblyTypeName: PlanetExplosion, Assembly-CSharp
-        m_MethodName: OptimisedExplode
+        m_MethodName: Explode
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -720,3 +721,16 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &1862526922
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1862526919}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae950765d03be1c43a96f6b3a8b7402a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Speed: 10

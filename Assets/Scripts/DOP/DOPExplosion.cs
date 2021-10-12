@@ -70,11 +70,11 @@ public class DOPExplosion : MonoBehaviour
 		for (int i = 0; i < segments; i++)
 		{
 			float weight = 10 + UnityEngine.Random.Range(-3, 3);
-			Vector3 pos = Quaternion.Euler(0, segmentAngle * i, 0) * Vector3.forward * radius + gameObject.transform.position + heightMod;
+			Vector3 myPosition = Quaternion.Euler(0, segmentAngle * i, 0) * Vector3.forward * radius + gameObject.transform.position + heightMod;
 			Entity instance = _entityManager.Instantiate(newEntityConversion);
-			Vector3 myPosition = pos;
+			quaternion myRotation = Quaternion.LookRotation(transform.position - myPosition, Vector3.up);
 			_entityManager.SetComponentData(instance, new Translation() { Value = myPosition });
-			_entityManager.SetComponentData(instance, new Rotation() { Value = quaternion.LookRotation(Vector3.zero - myPosition, new float3(0, 1, 0)) });
+			_entityManager.SetComponentData(instance, new Rotation() { Value = myRotation });
 			// I just want my entity to remember its start location
 			//_entityManager.AddComponentData(instance, new float3() { x = myPosition.x, y = myPosition.y, z = myPosition.z });
 			//_entityManager.SetComponentData(instance, new float3() { x = myPosition.x, y = myPosition.y, z = myPosition.z });

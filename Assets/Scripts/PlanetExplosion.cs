@@ -114,7 +114,7 @@ public class PlanetExplosion : MonoBehaviour
         float energy = -(Mathf.Pow(dist, 2)) / ExplosiveForce + ExplosiveRadius;
         if (energy < 0f)
         {
-            return energy / cubeWeight;
+            return 0f;
         }
         else
         {
