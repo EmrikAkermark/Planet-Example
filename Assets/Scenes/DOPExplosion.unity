@@ -149,12 +149,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 371989297}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ad9d06c1f7733b74c9d14c987e934143, type: 3}
+  m_Script: {fileID: 11500000, guid: efdb1cbc6e4e0ee44b541e7a3a9e7823, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  OurObject: {fileID: 6558835758767001869, guid: bb756225c39b5e8479029b983e518f3f,
+  OurObject: {fileID: 6558835758767001869, guid: 9987ccb4ea94bef41918d7686ee142e2,
     type: 3}
-  NumberOfObjects: 10000
+  NumberOfObjects: 0
   PlanetRadius: 100
 --- !u!4 &371989299
 Transform:

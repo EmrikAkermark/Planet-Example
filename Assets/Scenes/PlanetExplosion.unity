@@ -152,17 +152,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7453b76e8d51a834cbd2af2e4e3548ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlanetRadius: 13
-  ObjectWidth: 1
-  unitPrefab: {fileID: 6558835758767001869, guid: 2fd8a531c2d20a8418b1f0d01e232005,
-    type: 3}
-  CubeWeight: 4
-  CubeWeightVariation: 1
-  ExplosiveForce: 100
-  ExplosiveRadius: 10
-  ExplosiveArray: []
-  ExplosionOrigin: {fileID: 1862526920}
-  VisualiserSpeed: 1
 --- !u!4 &401207570
 Transform:
   m_ObjectHideFlags: 0
@@ -297,12 +286,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 773210298}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7453b76e8d51a834cbd2af2e4e3548ab, type: 3}
+  m_Script: {fileID: 11500000, guid: 29194d0989016e141a6719ae91ecc2a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   PlanetRadius: 30
   ObjectWidth: 1
-  unitPrefab: {fileID: 6558835758767001869, guid: 2fd8a531c2d20a8418b1f0d01e232005,
+  unitPrefab: {fileID: 6558835758767001869, guid: 2aa628b3cb367a64290fd2c4eed65487,
     type: 3}
   CubeWeight: 5
   CubeWeightVariation: 2
@@ -310,7 +299,7 @@ MonoBehaviour:
   ExplosiveRadius: 100
   ExplosiveArray: []
   ExplosionOrigin: {fileID: 1862526920}
-  VisualiserSpeed: 1000
+  VisualiserSpeed: 50
 --- !u!4 &773210300
 Transform:
   m_ObjectHideFlags: 0
@@ -688,7 +677,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1862526919}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -101.58}
+  m_LocalPosition: {x: 0, y: 0, z: 88}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -703,7 +692,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1862526919}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8af2b1a043092c346a428bc2f624348b, type: 3}
+  m_Script: {fileID: 11500000, guid: f5d2b45ebb7a8b641b98091ffcfeb077, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Event:
@@ -733,4 +722,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae950765d03be1c43a96f6b3a8b7402a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Speed: 10
