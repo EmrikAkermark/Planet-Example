@@ -3,6 +3,12 @@ using Unity.Entities;
 using Unity.Transforms;
 using Unity.Mathematics;
 
+struct ExplosionData : IComponentData 
+{
+	public float3 OriginalPos;
+	public float3 OriginalRot;
+	public float3 ExplosionPos;
+}
 
 public class DOPExplosion : MonoBehaviour
 {
@@ -72,9 +78,11 @@ public class DOPExplosion : MonoBehaviour
 			float weight = 10 + UnityEngine.Random.Range(-3, 3);
 			Vector3 myPosition = Quaternion.Euler(0, segmentAngle * i, 0) * Vector3.forward * radius + gameObject.transform.position + heightMod;
 			Entity instance = _entityManager.Instantiate(newEntityConversion);
-			quaternion myRotation = Quaternion.LookRotation(transform.position - myPosition, Vector3.up);
+			quaternion myRotation = Quaternion.LookRotation(Vector3.Normalize(transform.position-myPosition), Vector3.up);
+			Vector3 oboy = Quaternion.LookRotation(Vector3.Normalize(transform.position - myPosition), Vector3.up).eulerAngles;
 			_entityManager.SetComponentData(instance, new Translation() { Value = myPosition });
 			_entityManager.SetComponentData(instance, new Rotation() { Value = myRotation });
+			_entityManager.AddComponentData(instance, new ExplosionData { OriginalPos = myPosition, OriginalRot = oboy, ExplosionPos = transform.position });
 			// I just want my entity to remember its start location
 			//_entityManager.AddComponentData(instance, new float3() { x = myPosition.x, y = myPosition.y, z = myPosition.z });
 			//_entityManager.SetComponentData(instance, new float3() { x = myPosition.x, y = myPosition.y, z = myPosition.z });
