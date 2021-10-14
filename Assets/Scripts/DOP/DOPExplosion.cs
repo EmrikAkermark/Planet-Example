@@ -15,15 +15,19 @@ struct UnitWeight : IComponentData
 	public float Value;
 }
 
+struct NoMoveTag : IComponentData{ }
+
 public class DOPExplosion : MonoBehaviour
 {
 	public GameObject OurObject;
+	public GameObject ForceOrigin;
 	public float UnitBaseWeight = 5f;
 	public float UnitWeightVariation = 2f;
 	public float PlanetRadius = 100f;
 
 	private EntityManager _entityManager;
 	private Entity newEntityConversion;
+	private Entity forceEntity;
 	private GameObjectConversionSettings settings;
 	private int _numberOfBoxes = 0;
 
@@ -40,9 +44,13 @@ public class DOPExplosion : MonoBehaviour
 		_entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 		settings = GameObjectConversionSettings.FromWorld(World.DefaultGameObjectInjectionWorld, null);
 		newEntityConversion = GameObjectConversionUtility.ConvertGameObjectHierarchy(OurObject, settings);
+		forceEntity = GameObjectConversionUtility.ConvertGameObjectHierarchy(ForceOrigin, settings);
 
 		SetUpAngles();
 		Debug.Log($"We have {_numberOfBoxes} boxes out");
+		Entity force = _entityManager.Instantiate(forceEntity);
+		_entityManager.SetComponentData(force, new Translation { Value = transform.position });
+		//_entityManager.AddComponent<InputData>(force);
 	}
 
 	private void SetUpAngles()
@@ -93,6 +101,10 @@ public class DOPExplosion : MonoBehaviour
 			_entityManager.SetComponentData(instance, new Rotation() { Value = myRotation });
 			_entityManager.AddComponentData(instance, new ExplosionData { OriginalPos = myPosition, ExplosionPos = transform.position });
 			_entityManager.AddComponentData(instance, new UnitWeight { Value = UnitBaseWeight + UnityEngine.Random.Range(-UnitWeightVariation, UnitWeightVariation)});
+			if(i%2 == 0)
+			{
+				_entityManager.AddComponent<NoMoveTag>(instance);
+			}
 
 			_numberOfBoxes++;
 		}
