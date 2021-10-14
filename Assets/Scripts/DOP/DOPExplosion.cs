@@ -2,7 +2,7 @@ using UnityEngine;
 using Unity.Entities;
 using Unity.Transforms;
 using Unity.Mathematics;
-
+using Unity.Profiling;
 struct ExplosionData : IComponentData 
 {
 	public float3 OriginalPos;
@@ -27,26 +27,27 @@ public class DOPExplosion : MonoBehaviour
 	private GameObjectConversionSettings settings;
 	private int _numberOfBoxes = 0;
 
+	private static readonly ProfilerMarker s_AngleSettingpm = new ProfilerMarker("Setting Angles");
+	private static readonly ProfilerMarker s_Instancingpm = new ProfilerMarker("Instancing");
 
 	void Start()
     {
+	
+    }
+
+	public void GETTHISSHIT()
+	{
 		_entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 		settings = GameObjectConversionSettings.FromWorld(World.DefaultGameObjectInjectionWorld, null);
 		newEntityConversion = GameObjectConversionUtility.ConvertGameObjectHierarchy(OurObject, settings);
 
 		SetUpAngles();
 		Debug.Log($"We have {_numberOfBoxes} boxes out");
-		//for(var i = 0; i < NumberOfObjects; i++)
-		//{
-		//	Entity instance = _entityManager.Instantiate(newEntityConversion);
-		//	Vector3 myPosition = new Vector3(Random.Range(-100, 100), 0, Random.Range(-100, 100));
-		//	_entityManager.SetComponentData(instance, new Translation() { Value = myPosition });
-		//	_entityManager.SetComponentData(instance, new Rotation() { Value = transform.rotation });
-		//}
-    }
+	}
 
 	private void SetUpAngles()
 	{
+		s_AngleSettingpm.Begin();
 		float circumference = PlanetRadius * Mathf.PI * 2;
 		float segments = 1;
 		while (circumference / segments > 1)
@@ -56,12 +57,15 @@ public class DOPExplosion : MonoBehaviour
 		segments--;
 		float segmentAngle = 360 / segments;
 		int currentSegment = 0;
+		s_AngleSettingpm.End();
 		while (segmentAngle * currentSegment < 360f)
 		{
 			float currentAngle = segmentAngle * currentSegment;
 			float height = Mathf.Cos(Mathf.Deg2Rad * currentAngle) * PlanetRadius;
 			float radius = Mathf.Sin(Mathf.Deg2Rad * currentAngle) * PlanetRadius;
+			s_Instancingpm.Begin();
 			SetPositions(radius, height);
+			s_Instancingpm.End();
 			currentSegment++;
 		}
 	}

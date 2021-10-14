@@ -8,8 +8,6 @@ public class DOPExplosiveForce : SystemBase
 
 	private static readonly ProfilerMarker s_ExpForcepm = new ProfilerMarker("HOLY FUCK");
 
-
-
 	protected override void OnUpdate()
 	{
 		s_ExpForcepm.Begin();
