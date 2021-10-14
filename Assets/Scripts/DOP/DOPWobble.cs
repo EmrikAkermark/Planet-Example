@@ -2,6 +2,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+[DisableAutoCreation]
 public class DOPWobble : SystemBase
 {
 	protected override void OnUpdate()
@@ -13,7 +14,7 @@ public class DOPWobble : SystemBase
 		// Notice the ScheduleParallel at the end, this will run over multiple threads.
 		Entities.ForEach((ref Translation translation, in ExplosionData ExData) =>
 		{
-			translation.Value = ExData.OriginalPos + math.normalize(ExData.ExplosionPos - ExData.OriginalPos) * factor * 1000 ;
+			translation.Value = ExData.OriginalPos + math.normalize(ExData.ExplosionPos - ExData.OriginalPos) * factor * 1000;
 		}).ScheduleParallel();
 	}
 }
