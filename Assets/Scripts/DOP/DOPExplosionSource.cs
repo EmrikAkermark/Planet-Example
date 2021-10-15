@@ -30,7 +30,11 @@ public class DOPExplosionSource : SystemBase
 
 			if(Input.GetKey(inputData.turboKey))
 			{
-				Movement = Movement * 10;
+				Movement *= 130;
+			}
+			else
+			{
+				Movement *= 50;
 			}
 
 			Movement *= deltaTime;
