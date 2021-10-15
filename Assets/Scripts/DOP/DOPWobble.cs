@@ -2,7 +2,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-[DisableAutoCreation]
+//[DisableAutoCreation]
 public class DOPWobble : SystemBase
 {
 	protected override void OnUpdate()

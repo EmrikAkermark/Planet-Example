@@ -36,7 +36,7 @@ public class DOPExplosion : MonoBehaviour
 
 	void Start()
     {
-	
+		GETTHISSHIT();
     }
 
 	public void GETTHISSHIT()
@@ -50,6 +50,7 @@ public class DOPExplosion : MonoBehaviour
 		Debug.Log($"We have {_numberOfBoxes} boxes out");
 		Entity force = _entityManager.Instantiate(forceEntity);
 		_entityManager.SetComponentData(force, new Translation { Value = transform.position });
+		
 		//_entityManager.AddComponent<InputData>(force);
 	}
 

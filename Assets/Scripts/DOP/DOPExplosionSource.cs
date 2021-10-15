@@ -14,6 +14,7 @@ public class DOPExplosionSource : SystemBase
 		//var factor = math.abs(math.sin((float)Time.ElapsedTime * 0.3f));
 
 		float3 Movement = new float3();
+		float deltaTime = Time.DeltaTime;
 
 		Entities.ForEach((ref Translation translation, in InputData inputData) =>
 		{
@@ -29,8 +30,10 @@ public class DOPExplosionSource : SystemBase
 
 			if(Input.GetKey(inputData.turboKey))
 			{
-				Movement = Movement * 3;
+				Movement = Movement * 10;
 			}
+
+			Movement *= deltaTime;
 			translation.Value += Movement;
 		}).Run();
 

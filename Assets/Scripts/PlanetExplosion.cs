@@ -60,7 +60,7 @@ public class PlanetExplosion : MonoBehaviour
             cubes[i].Cube.transform.position = cubes[i].StartVector + Vector3.Normalize(cubes[i].StartVector - ExplosionOrigin.position) * ExplosionEnergy(cubes[i].StartVector, cubes[i].Weight);
             cubes[i].Cube.transform.rotation = Quaternion.LookRotation(Vector3.Normalize(cubes[i].StartVector - ExplosionOrigin.position));
         }
-        lastPosition = ExplosionOrigin.position;
+        //lastPosition = ExplosionOrigin.position;
     }
     public void OptimisedExplode()
     {
