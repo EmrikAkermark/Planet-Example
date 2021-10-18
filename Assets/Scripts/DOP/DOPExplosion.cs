@@ -1,4 +1,5 @@
 using UnityEngine;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
 using Unity.Mathematics;
@@ -17,6 +18,24 @@ struct UnitWeight : IComponentData
 
 struct NoMoveTag : IComponentData{ }
 
+struct NewlyInstanced : IComponentData { }
+
+//public class DOPInitialiser : SystemBase
+//{
+//	protected override void OnUpdate()
+//	{
+
+//		Entities.WithAll<NewCube>().ForEach((int entityInQueryIndex) =>
+//		{ }).WithDisposeOnCompletion(positions).ScheduleParallel();
+
+//		EntityManager.SetComponentData(instance, new Translation() { Value = myPosition });
+//		EntityManager.(instance, new Rotation() { Value = myRotation });
+//		EntityManager.AddComponentData(instance, new ExplosionData { OriginalPos = myPosition, ExplosionPos = transform.position });
+//		EntityManager.AddComponentData(instance, new UnitWeight { Value = UnitBaseWeight + UnityEngine.Random.Range(-UnitWeightVariation, UnitWeightVariation) });
+//		Enabled = false;
+//	}
+//}
+
 public class DOPExplosion : MonoBehaviour
 {
 	public GameObject OurObject;
@@ -31,21 +50,25 @@ public class DOPExplosion : MonoBehaviour
 	private GameObjectConversionSettings settings;
 	private int _numberOfBoxes = 0;
 
+	private Settings explosionSettings;
+
 	private static readonly ProfilerMarker AngleSettingpm = new ProfilerMarker("Setting Angles");
 	private static readonly ProfilerMarker Instancingpm = new ProfilerMarker("Instancing");
+	private static readonly ProfilerMarker SettingUppm = new ProfilerMarker("Setup");
+	//private static readonly ProfilerMarker Instancingpm = new ProfilerMarker("Instancing");
 
 	void Start()
     {
-		//GETTHISSHIT();
-    }
-
-	public void GETTHISSHIT()
-	{
 		_entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 		settings = GameObjectConversionSettings.FromWorld(World.DefaultGameObjectInjectionWorld, null);
 		newEntityConversion = GameObjectConversionUtility.ConvertGameObjectHierarchy(OurObject, settings);
 		forceEntity = GameObjectConversionUtility.ConvertGameObjectHierarchy(ForceOrigin, settings);
+		//explosionSettings = GetSingleton
+		//GETTHISSHIT();
+	}
 
+	public void GETTHISSHIT()
+	{
 		SetUpAngles();
 		Debug.Log($"We have {_numberOfBoxes} boxes out");
 		Entity force = _entityManager.Instantiate(forceEntity);
@@ -92,10 +115,11 @@ public class DOPExplosion : MonoBehaviour
 
 		for (int i = 0; i < segments; i++)
 		{
-			float weight = 10 + UnityEngine.Random.Range(-3, 3);
 			Vector3 myPosition = Quaternion.Euler(0, segmentAngle * i, 0) * Vector3.forward * radius + gameObject.transform.position + heightMod;
 			Entity instance = _entityManager.Instantiate(newEntityConversion);
 			quaternion myRotation = Quaternion.LookRotation(Vector3.Normalize(transform.position-myPosition), Vector3.up);
+
+			SettingUppm.Begin();
 			_entityManager.SetComponentData(instance, new Translation() { Value = myPosition });
 			_entityManager.SetComponentData(instance, new Rotation() { Value = myRotation });
 			_entityManager.AddComponentData(instance, new ExplosionData { OriginalPos = myPosition, ExplosionPos = transform.position });
@@ -104,7 +128,7 @@ public class DOPExplosion : MonoBehaviour
 			{
 				_entityManager.AddComponent<NoMoveTag>(instance);
 			}
-
+			SettingUppm.End();
 			_numberOfBoxes++;
 		}
 	}

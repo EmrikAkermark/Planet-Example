@@ -219,6 +219,7 @@ MonoBehaviour:
   downKey: 115
   rightKey: 100
   leftKey: 97
+  turboKey: 304
 --- !u!1 &469114723
 GameObject:
   m_ObjectHideFlags: 0
