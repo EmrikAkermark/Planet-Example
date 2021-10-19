@@ -1,14 +1,12 @@
-using UnityEngine;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
 using Unity.Mathematics;
-using Unity.Profiling;
+
 struct ExplosionData : IComponentData 
 {
 	public float3 OriginalPos;
 	public float3 ExplosionPos;
-	
 }
 
 struct UnitWeight : IComponentData
@@ -16,122 +14,147 @@ struct UnitWeight : IComponentData
 	public float Value;
 }
 
-struct NoMoveTag : IComponentData{ }
-
-struct NewlyInstanced : IComponentData { }
-
-//public class DOPInitialiser : SystemBase
-//{
-//	protected override void OnUpdate()
-//	{
-
-//		Entities.WithAll<NewCube>().ForEach((int entityInQueryIndex) =>
-//		{ }).WithDisposeOnCompletion(positions).ScheduleParallel();
-
-//		EntityManager.SetComponentData(instance, new Translation() { Value = myPosition });
-//		EntityManager.(instance, new Rotation() { Value = myRotation });
-//		EntityManager.AddComponentData(instance, new ExplosionData { OriginalPos = myPosition, ExplosionPos = transform.position });
-//		EntityManager.AddComponentData(instance, new UnitWeight { Value = UnitBaseWeight + UnityEngine.Random.Range(-UnitWeightVariation, UnitWeightVariation) });
-//		Enabled = false;
-//	}
-//}
-
-public class DOPExplosion : MonoBehaviour
+public class DOPExplosion : SystemBase
 {
-	public GameObject OurObject;
-	public GameObject ForceOrigin;
-	public float UnitBaseWeight = 5f;
-	public float UnitWeightVariation = 2f;
-	public float PlanetRadius = 100f;
+	float PlanetRadius;
+	float3 StartPosition;
+	NativeList<float3> PositionList;
 
-	private EntityManager _entityManager;
-	private Entity newEntityConversion;
-	private Entity forceEntity;
-	private GameObjectConversionSettings settings;
-	private int _numberOfBoxes = 0;
+	EndSimulationEntityCommandBufferSystem endSimulationEcbSystem;
 
-	private Settings explosionSettings;
-
-	private static readonly ProfilerMarker AngleSettingpm = new ProfilerMarker("Setting Angles");
-	private static readonly ProfilerMarker Instancingpm = new ProfilerMarker("Instancing");
-	private static readonly ProfilerMarker SettingUppm = new ProfilerMarker("Setup");
-	//private static readonly ProfilerMarker Instancingpm = new ProfilerMarker("Instancing");
-
-	void Start()
-    {
-		_entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-		settings = GameObjectConversionSettings.FromWorld(World.DefaultGameObjectInjectionWorld, null);
-		newEntityConversion = GameObjectConversionUtility.ConvertGameObjectHierarchy(OurObject, settings);
-		forceEntity = GameObjectConversionUtility.ConvertGameObjectHierarchy(ForceOrigin, settings);
-		//explosionSettings = GetSingleton
-		//GETTHISSHIT();
-	}
-
-	public void GETTHISSHIT()
+	protected override void OnCreate()
 	{
-		SetUpAngles();
-		Debug.Log($"We have {_numberOfBoxes} boxes out");
-		Entity force = _entityManager.Instantiate(forceEntity);
-		_entityManager.SetComponentData(force, new Translation { Value = transform.position });
+		endSimulationEcbSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
 	}
 
+	protected override void OnUpdate()
+	{
+		//Setting up settings and commandbuffer
+		var ecb = endSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
+		var settings = GetSingleton<Settings>();
+
+		//Setting up global values
+		StartPosition = settings.StartingPosition;
+		PlanetRadius = settings.PlanetRadius;
+		PositionList = new NativeList<float3>(0, Allocator.Persistent);
+
+		//Creates every position on the sphere
+		SetUpAngles();
+
+		//Creating the cube, and adding some components before instancing
+		Entity Cube = settings.Cube;
+		//Todo, implement random variation in weight
+		EntityManager.AddComponentData(Cube, new UnitWeight { Value = settings.UnitBaseWeight });
+		EntityManager.AddComponentData(Cube, new ExplosionData {ExplosionPos = settings.StartingPosition });
+
+		//This array exist to quickly instance all the cubes,
+		//which is necessary due to the large amounts of them
+		//past sphere-sizes of 10
+		NativeArray<Entity> Instances = new NativeArray<Entity>(PositionList.Length, Allocator.Temp);
+		EntityManager.Instantiate(Cube, Instances);
+
+		//Ugly workaround due to foreach requiring local variables.
+		//However, this does give us a chance to turn the list into an array
+		var PositionArray = new NativeArray<float3>(PositionList.Length, Allocator.Persistent);
+		for (int i = 0; i < PositionArray.Length; i++)
+		{
+			PositionArray[i] = PositionList[i];
+		};
+
+		//These are not needed anymore
+		Instances.Dispose();
+		PositionList.Clear();
+		PositionList.Dispose();
+
+		//This sets the position of every instanced cube to a unique point
+		//on the sphere from the PositionArray, along with removing the
+		//<NewCube> tag so they won't be affacted by the setup of another sphere
+		//if one is spawned
+		Entities.WithAll<NewCube>().ForEach((int entityInQueryIndex, Entity entity, ref Translation translation, ref ExplosionData explosionData) =>
+		{
+			explosionData.OriginalPos = PositionArray[entityInQueryIndex];
+			translation.Value = PositionArray[entityInQueryIndex];
+			ecb.RemoveComponent<NewCube>(entityInQueryIndex ,entity);
+		}).WithDisposeOnCompletion(PositionArray).ScheduleParallel();
+		
+		//This entity does not actually do anything, but serves as a visualiser
+		//for the explosive point of this sphere
+		Entity sphere = EntityManager.Instantiate(settings.ForceSphere);
+		EntityManager.SetComponentData(sphere, new Translation { Value = settings.StartingPosition });
+
+
+		endSimulationEcbSystem.AddJobHandleForProducer(this.Dependency);
+		Enabled = false;
+	}
 	private void SetUpAngles()
 	{
-		AngleSettingpm.Begin();
-		float circumference = PlanetRadius * Mathf.PI * 2;
+
+		float circumference = PlanetRadius * math.PI * 2;
 		float segments = 1;
+		//Finds out how many cubes will fit around the circumference
+		//if a cube is size 1, change the one if the cube size is changed
 		while (circumference / segments > 1)
 		{
 			segments++;
 		}
+		//The while loop exits when the the amount of cubes would intersect
+		//one another, we take one step back for the densest amount of cubes without
+		//them intersecting each other
 		segments--;
-		float segmentAngle = 360 / segments;
+
+		//Finds the angle in degrees between each cube in the sphere
+		//Casting the segment int to a float is VERY important,
+		//funky spheres and divide by 0 attempts happens without it
+		//(Thank you 1000 times Oliver Lebert)
+		float segmentAngle = 360f / (float)segments;
 		int currentSegment = 0;
-		AngleSettingpm.End();
+
+		//This finds the radous of each "band" around the sphere,
+		//as well as its height compared to the equator.
 		while (segmentAngle * currentSegment < 360f)
 		{
 			float currentAngle = segmentAngle * currentSegment;
-			float height = Mathf.Cos(Mathf.Deg2Rad * currentAngle) * PlanetRadius;
-			float radius = Mathf.Sin(Mathf.Deg2Rad * currentAngle) * PlanetRadius;
-			Instancingpm.Begin();
+			float height = math.cos(math.radians(currentAngle)) * PlanetRadius;
+			float radius = math.sin(math.radians(currentAngle)) * PlanetRadius;
+
+			//This sets the positions of the cubes in the band
 			SetPositions(radius, height);
-			Instancingpm.End();
+
 			currentSegment++;
 		}
 	}
 
 	private void SetPositions(float radius, float newHeight)
 	{
-		Vector3 heightMod = new Vector3(0, newHeight, 0);
-
-		float circumference = radius * Mathf.PI * 2;
-		float segments = 1;
+		//Much of this is the same code as SetupAngles,
+		//only with a new radius and height for the specific band
+		float3 heightMod = new float3 { y = newHeight };
+		float circumference = radius * math.PI * 2;
+		int segments = 1;
 		while (circumference / segments > 1)
 		{
 			segments++;
 		}
 		segments--;
-		float segmentAngle = 360 / segments;
 
+		if(segments == 0)
+		{
+			return;
+		}
+		//An array to store the positions of the band, before they are
+		//inserted in the complete positions list
+		NativeArray<float3> Ring = new NativeArray<float3>(segments, Allocator.Temp);
+
+		float segmentAngle = 360f / (float)segments;
 		for (int i = 0; i < segments; i++)
 		{
-			Vector3 myPosition = Quaternion.Euler(0, segmentAngle * i, 0) * Vector3.forward * radius + gameObject.transform.position + heightMod;
-			Entity instance = _entityManager.Instantiate(newEntityConversion);
-			quaternion myRotation = Quaternion.LookRotation(Vector3.Normalize(transform.position-myPosition), Vector3.up);
-
-			SettingUppm.Begin();
-			_entityManager.SetComponentData(instance, new Translation() { Value = myPosition });
-			_entityManager.SetComponentData(instance, new Rotation() { Value = myRotation });
-			_entityManager.AddComponentData(instance, new ExplosionData { OriginalPos = myPosition, ExplosionPos = transform.position });
-			_entityManager.AddComponentData(instance, new UnitWeight { Value = UnitBaseWeight + UnityEngine.Random.Range(-UnitWeightVariation, UnitWeightVariation)});
-			if(i%2 == 0)
-			{
-				_entityManager.AddComponent<NoMoveTag>(instance);
-			}
-			SettingUppm.End();
-			_numberOfBoxes++;
+			//Using triggettan, or Pythagorean identity, this finds all the
+			//points along the radius of the current band where a cube can fit
+			Ring[i] = new float3{	x = math.sin(math.radians(i * segmentAngle)),
+									z = math.cos(math.radians(i * segmentAngle))
+								} * radius + StartPosition + heightMod;
 		}
+		PositionList.AddRange(Ring);
+		Ring.Dispose();
 	}
-
-
 }
