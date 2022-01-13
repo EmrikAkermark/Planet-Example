@@ -20,11 +20,20 @@ public class DOPExplosion : SystemBase
 	float3 StartPosition;
 	NativeList<float3> PositionList;
 
+	Random RandomData;
+
 	EndSimulationEntityCommandBufferSystem endSimulationEcbSystem;
 
 	protected override void OnCreate()
 	{
 		endSimulationEcbSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
+	}
+
+	protected override void OnStartRunning()
+	{
+		base.OnStartRunning();
+
+		RandomData = new Random(1);
 	}
 
 	protected override void OnUpdate()
@@ -66,17 +75,31 @@ public class DOPExplosion : SystemBase
 		PositionList.Clear();
 		PositionList.Dispose();
 
+		NativeArray<float> UnitWeights = new NativeArray<float>(PositionArray.Length, Allocator.Persistent);
+		for (int i = 0; i < UnitWeights.Length; i++)
+		{
+			UnitWeights[i] = RandomData.NextFloat(settings.UnitBaseWeight - settings.UnitWeightVariation, settings.UnitBaseWeight + settings.UnitWeightVariation);
+		};
+
+		Entities.WithAll<NewCube>().ForEach((int entityInQueryIndex, ref UnitWeight unitWeight) =>
+		{
+			unitWeight.Value = UnitWeights[entityInQueryIndex];
+		}).WithDisposeOnCompletion(UnitWeights).ScheduleParallel();
+
+
 		//This sets the position of every instanced cube to a unique point
 		//on the sphere from the PositionArray, along with removing the
 		//<NewCube> tag so they won't be affacted by the setup of another sphere
 		//if one is spawned
-		Entities.WithAll<NewCube>().ForEach((int entityInQueryIndex, Entity entity, ref Translation translation, ref ExplosionData explosionData) =>
+		Entities.WithAll<NewCube>().ForEach((int entityInQueryIndex, Entity entity, ref Translation translation, ref ExplosionData explosionData, ref UnitWeight unitWeight) =>
 		{
 			explosionData.OriginalPos = PositionArray[entityInQueryIndex];
 			translation.Value = PositionArray[entityInQueryIndex];
+			
 			ecb.RemoveComponent<NewCube>(entityInQueryIndex ,entity);
 		}).WithDisposeOnCompletion(PositionArray).ScheduleParallel();
-		
+
+
 		//This entity does not actually do anything, but serves as a visualiser
 		//for the explosive point of this sphere
 		Entity sphere = EntityManager.Instantiate(settings.ForceSphere);

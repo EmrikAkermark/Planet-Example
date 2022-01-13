@@ -8,6 +8,8 @@ public struct InputData : IComponentData
 	public KeyCode downKey;
 	public KeyCode rightKey;
 	public KeyCode leftKey;
+	public KeyCode inKey;
+	public KeyCode outKey;
 	public KeyCode turboKey;
 
 

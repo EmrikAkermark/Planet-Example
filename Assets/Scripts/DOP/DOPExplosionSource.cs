@@ -17,13 +17,17 @@ public class DOPExplosionSource : SystemBase
 			bool isLeftKeyPressed = Input.GetKey(inputData.leftKey);
 			bool isUpKeyPressed = Input.GetKey(inputData.upKey);
 			bool isDownKeyPressed = Input.GetKey(inputData.downKey);
+			bool isInKeyPressed = Input.GetKey(inputData.inKey);
+			bool isOutKeyPressed = Input.GetKey(inputData.outKey);
 
 			Movement.x = Convert.ToInt16(isRightKeyPressed);
 			Movement.x -= Convert.ToInt16(isLeftKeyPressed);
 			Movement.y = Convert.ToInt16(isUpKeyPressed);
 			Movement.y -= Convert.ToInt16(isDownKeyPressed);
+			Movement.z = Convert.ToInt16(isInKeyPressed);
+			Movement.z -= Convert.ToInt16(isOutKeyPressed);
 
-			if(Input.GetKey(inputData.turboKey))
+			if (Input.GetKey(inputData.turboKey))
 			{
 				Movement *= 130;
 			}

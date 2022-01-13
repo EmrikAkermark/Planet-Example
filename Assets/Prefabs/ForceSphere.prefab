@@ -99,4 +99,6 @@ MonoBehaviour:
   downKey: 115
   rightKey: 100
   leftKey: 97
+  inKey: 101
+  outKey: 113
   turboKey: 304

@@ -161,8 +161,8 @@ MonoBehaviour:
     type: 3}
   UnitBaseWeight: 5
   UnitWeightVariation: 3
-  PlanetRadius: 150
-  ExplosiveForce: 40
+  PlanetRadius: 40
+  ExplosiveForce: 150
 --- !u!4 &1871536007
 Transform:
   m_ObjectHideFlags: 0
